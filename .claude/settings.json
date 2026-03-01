@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"d:/BaiduSyncdisk/vibe-modelling/.claude/hooks/verify-reminder.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"d:/BaiduSyncdisk/vibe-modelling/.claude/hooks/pre-compact.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"d:/BaiduSyncdisk/vibe-modelling/.claude/hooks/log-reminder.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

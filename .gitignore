@@ -1,0 +1,18 @@
+# Ignore everything by default (real research projects)
+*
+
+# Include the workflow configuration
+!.gitignore
+!.claude/
+!.claude/**
+!README.md
+!LICENSE
+!install.sh
+
+# Exclude sensitive/temp files even inside .claude/
+.claude/projects/
+.claude/plans/
+*.mx
+*.aux
+*.log
+*.synctex.gz
