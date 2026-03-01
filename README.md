@@ -1,10 +1,49 @@
-# Vibe Modelling
+<p align="center">
+  <img src="assets/logo-placeholder.png" alt="Vibe Modelling" width="200">
+</p>
 
-A Claude Code workflow for theoretical economics papers — from idea to submission.
+<h1 align="center">Vibe Modelling</h1>
+
+<p align="center">
+  <strong>Claude Code workflow for theoretical economics papers — from idea to submission.</strong>
+</p>
+
+<p align="center">
+  <a href="#installation"><img src="https://img.shields.io/badge/claude--code-workflow-blue?style=flat-square&logo=anthropic" alt="Claude Code"></a>
+  <a href="https://www.wolfram.com/engine/"><img src="https://img.shields.io/badge/wolfram-engine%2014-red?style=flat-square&logo=wolfram" alt="Wolfram Engine"></a>
+  <a href="#prerequisites"><img src="https://img.shields.io/badge/LaTeX-MikTeX%20%7C%20TeX%20Live-green?style=flat-square&logo=latex" alt="LaTeX"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License"></a>
+  <a href="https://github.com/zhangjx0101/vibe-modelling/stargazers"><img src="https://img.shields.io/github/stars/zhangjx0101/vibe-modelling?style=flat-square" alt="Stars"></a>
+</p>
+
+<p align="center">
+  <a href="#what-it-does">What It Does</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#customization">Customization</a>
+</p>
+
+---
+
+## What is Vibe Modelling?
 
 **Vibe Modelling = Vibe Coding for Economic Theory.**
 
 Instead of writing code, you "vibe" your way through model design, symbolic derivation, and paper writing, with Claude Code orchestrating the entire process and Wolfram Engine handling all the math.
+
+> **LLM thinks. CAS computes. Never the other way around.**
+
+| Task | Who | Tool |
+|---|---|---|
+| Model design, assumptions, intuition | Claude | Natural language |
+| Solve equations, simplify, derivatives | Wolfram Engine | `Solve[]`, `D[]`, `Simplify[]` |
+| Sign determination, monotonicity | Wolfram Engine | `Reduce[expr > 0, ...]` |
+| LaTeX formulas | Wolfram Engine | `ToString[TeXForm[...]]` |
+| Economic interpretation | Claude | Paper writing |
+| Adversarial review | Claude Agents | math-critic, referee-sim |
+
+**Zero tolerance for hand-waving math.** Every sign claim must have `Reduce[]` output. Every formula must have `TeXForm[]` source. Every derivation must pass numerical verification.
 
 ## What It Does
 
@@ -27,20 +66,39 @@ Instead of writing code, you "vibe" your way through model design, symbolic deri
 /full-paper →  End-to-end pipeline                      🚀
 ```
 
-## Core Philosophy
+## Quick Start
 
-> **LLM thinks. CAS computes. Never the other way around.**
+```bash
+git clone https://github.com/zhangjx0101/vibe-modelling.git
+cd vibe-modelling
+mkdir "My New Paper"
+cd "My New Paper"
+claude
+```
 
-| Task | Who | Tool |
-|---|---|---|
-| Model design, assumptions, intuition | Claude | Natural language |
-| Solve equations, simplify, derivatives | Wolfram Engine | `Solve[]`, `D[]`, `Simplify[]` |
-| Sign determination, monotonicity | Wolfram Engine | `Reduce[expr > 0, ...]` |
-| LaTeX formulas | Wolfram Engine | `ToString[TeXForm[...]]` |
-| Economic interpretation | Claude | Paper writing |
-| Adversarial review | Claude Agents | math-critic, referee-sim |
+Then in Claude Code:
 
-**Zero tolerance for hand-waving math.** Every sign claim must have `Reduce[]` output. Every formula must have `TeXForm[]` source. Every derivation must pass numerical verification.
+```
+> /model Cournot duopoly with AI cost reduction
+> /derive solve the two-stage game
+> /write Section 3: Equilibrium Analysis
+> /compile
+```
+
+## Workflow Overview
+
+```
+/idea → /study → /lit-review → /model → /derive → /verify → /plot
+                                                        ↓
+                            /submit ← quality-gates ← /write + /compile
+                                                        ↓
+                                        math-critic ↔ math-fixer (≤5 rounds)
+                                        econ-reviewer
+                                        referee-sim
+                                        proofreader
+                                        lit-verifier + fact-checker
+                                        latex-auditor
+```
 
 ## Architecture
 
@@ -86,7 +144,9 @@ math-fixer  (read-write, fixes problems with Wolfram verification)
 
 The critic cannot fix. The fixer cannot self-approve. Neither can skip Wolfram verification.
 
-### Quality Gates (100-point scoring)
+### Quality Gates
+
+100-point scoring system. Every paper is scored before submission:
 
 | Violation | Penalty |
 |---|---|
@@ -98,7 +158,7 @@ The critic cannot fix. The fixer cannot self-approve. Neither can skip Wolfram v
 | Fabricated reference | −30 |
 | Unverified SOC | −20 |
 
-Threshold: **≥ 85** to submit, **< 70** blocks submission.
+**≥ 85** → ready to submit · **70–84** → submit with warnings · **< 70** → blocked
 
 ## Prerequisites
 
@@ -115,7 +175,7 @@ Threshold: **≥ 85** to submit, **< 70** blocks submission.
 Clone this repo and put your economics projects inside it:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/vibe-modelling.git
+git clone https://github.com/zhangjx0101/vibe-modelling.git
 cd vibe-modelling
 
 # Your projects go here as subfolders:
@@ -127,7 +187,7 @@ claude   # Skills, agents, rules automatically available
 ### Option B: Copy to existing project
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/vibe-modelling.git
+git clone https://github.com/zhangjx0101/vibe-modelling.git
 cd vibe-modelling
 ./install.sh /path/to/your/project
 ```
@@ -137,56 +197,19 @@ cd vibe-modelling
 Copy to `~/.claude/` for all projects:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/vibe-modelling.git
+git clone https://github.com/zhangjx0101/vibe-modelling.git
 cd vibe-modelling
 ./install.sh ~/.claude
 ```
 
 ### Configure Wolfram Engine path
 
-Edit your project's `CLAUDE.md` or `.claude/settings.json` to set the Wolfram Engine path:
+Edit your project's `CLAUDE.md` to set the Wolfram Engine path:
 
 ```markdown
 ## Wolfram Engine
 - Path: `"/path/to/wolframscript" -code "..."`
 - Script execution: `"/path/to/wolframscript" -file "script.wl"`
-```
-
-## Quick Start
-
-```bash
-cd vibe-modelling
-claude
-
-# Study an existing paper
-> /study d'Aspremont and Jacquemin (1988) cooperative R&D model
-
-# Design a new model
-> /model Cournot duopoly with AI cost reduction
-
-# Derive equilibrium
-> /derive solve the two-stage game
-
-# Write a section
-> /write Section 3: Equilibrium Analysis
-
-# Run adversarial review
-> Launch math-critic agent on the paper
-```
-
-## Workflow Overview
-
-```
-/idea → /study → /lit-review → /model → /derive → /verify → /plot
-                                                        ↓
-                            /submit ← quality-gates ← /write + /compile
-                                                        ↓
-                                        math-critic ↔ math-fixer (≤5 rounds)
-                                        econ-reviewer
-                                        referee-sim
-                                        proofreader
-                                        lit-verifier + fact-checker
-                                        latex-auditor
 ```
 
 ## Target Journals
