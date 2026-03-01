@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-placeholder.png" alt="Vibe Modelling" width="200">
+  <img src="assets/vibe-modelling.png" alt="Vibe Modelling" width="300">
 </p>
 
 <h1 align="center">Vibe Modelling</h1>
