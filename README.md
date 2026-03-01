@@ -1,8 +1,8 @@
+<h1 align="center">Vibe Modelling</h1>
+
 <p align="center">
   <img src="assets/vibe-modelling.png" alt="Vibe Modelling" width="300">
 </p>
-
-<h1 align="center">Vibe Modelling</h1>
 
 <p align="center">
   <strong>Claude Code workflow for theoretical economics papers — from idea to submission.</strong>
