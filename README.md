@@ -1,4 +1,4 @@
-<h1 align="center">Vibe Modelling</h1>
+<h1 align="center">🐈‍⬛Vibe Modelling</h1>
 
 <p align="center">
   <img src="assets/vibe-modelling.png" alt="Vibe Modelling" width="500">
