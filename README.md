@@ -57,6 +57,7 @@ Instead of writing code, you "vibe" your way through model design, symbolic deri
 /plot       →  Academic figures (PDF vector)             📊
 /write      →  Write paper sections (journal norms)     ✍️
 /compile    →  LaTeX → PDF compilation                  📄
+/export-word→  LaTeX → Word (.docx, editable formulas)  📝
 /proofread  →  Academic English polish                  🔤
 /check-refs →  Verify references aren't hallucinated    📎
 /check-facts→  Fact-check empirical claims              🔍
@@ -104,7 +105,7 @@ Then in Claude Code:
 
 ```
 .claude/
-├── skills/          17 slash commands (invoked on demand)
+├── skills/          18 slash commands (invoked on demand)
 │   ├── derive/      Wolfram symbolic derivation
 │   ├── verify/      Numerical verification
 │   ├── write/       Paper writing
