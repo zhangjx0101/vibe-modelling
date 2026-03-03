@@ -22,7 +22,8 @@
   <a href="#quick-start">Quick Start</a> •
   <a href="#installation">Installation</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#customization">Customization</a>
+  <a href="#customization">Customization</a> •
+  <a href="docs/README.md"><strong>Usage Guide</strong></a>
 </p>
 
 ---
@@ -101,6 +102,19 @@ Then in Claude Code:
                                         lit-verifier + fact-checker
                                         latex-auditor
 ```
+
+## Documentation
+
+**Not sure which tools to use?** Check the [Usage Guide](docs/README.md):
+
+| Page | What you'll learn |
+|---|---|
+| [Scenarios](docs/scenarios.md) | "I want to do X" — find the right tools with dialogue examples |
+| [Examples](docs/examples.md) | Complete workflow walkthroughs from actual projects |
+| [Skills Reference](docs/skills-reference.md) | Detailed docs for all 18 slash commands |
+| [Agents Reference](docs/agents-reference.md) | Detailed docs for all 8 reviewing agents |
+| [Wolfram Guide](docs/wolfram-guide.md) | Wolfram Engine tips and pitfalls |
+| [Troubleshooting](docs/troubleshooting.md) | Known issues and solutions |
 
 ## Architecture
 

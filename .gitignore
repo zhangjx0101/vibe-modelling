@@ -10,6 +10,8 @@
 !install.sh
 !assets/
 !assets/**
+!docs/
+!docs/**
 
 # Exclude sensitive/temp files even inside .claude/
 .claude/projects/
