@@ -12,6 +12,7 @@
   <a href="#installation"><img src="https://img.shields.io/badge/claude--code-workflow-blue?style=flat-square&logo=anthropic" alt="Claude Code"></a>
   <a href="https://www.wolfram.com/engine/"><img src="https://img.shields.io/badge/wolfram-engine%2014-red?style=flat-square&logo=wolfram" alt="Wolfram Engine"></a>
   <a href="#prerequisites"><img src="https://img.shields.io/badge/LaTeX-MikTeX%20%7C%20TeX%20Live-green?style=flat-square&logo=latex" alt="LaTeX"></a>
+  <a href="https://pandoc.org/"><img src="https://img.shields.io/badge/pandoc-3.x-purple?style=flat-square" alt="Pandoc"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License"></a>
   <a href="https://github.com/zhangjx0101/vibe-modelling/stargazers"><img src="https://img.shields.io/github/stars/zhangjx0101/vibe-modelling?style=flat-square" alt="Stars"></a>
 </p>
@@ -121,10 +122,11 @@ Then in Claude Code:
 │   ├── fact-checker Empirical claims
 │   └── latex-auditor LaTeX format audit
 │
-├── rules/           8 governance policies
+├── rules/           9 governance policies
 │   ├── wolfram-first       All math through Wolfram
 │   ├── verify-before-claim Reduce[] before sign claims
 │   ├── quality-gates       100-point scoring system
+│   ├── export-workflow     Word export + derivation logs
 │   └── ...
 │
 └── hooks/           4 automatic triggers
@@ -168,6 +170,7 @@ The critic cannot fix. The fixer cannot self-approve. Neither can skip Wolfram v
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | AI orchestration | `npm install -g @anthropic-ai/claude-code` |
 | [Wolfram Engine](https://www.wolfram.com/engine/) | Symbolic computation | Free for developers |
 | [MikTeX](https://miktex.org/) or TeX Live | LaTeX compilation | Platform-specific |
+| [Pandoc](https://pandoc.org/) | Word/PDF export | `choco install pandoc` or [download](https://pandoc.org/installing.html) |
 
 ## Installation
 
