@@ -14,6 +14,7 @@ Find your scenario, see which tools to use, and follow the dialogue examples.
 | 6 | [Check quality before submission](#6-check-quality-before-submission) | `/check-refs`, `/check-facts` | `lit-verifier`, `fact-checker` | Medium |
 | 7 | [Respond to referees](#7-respond-to-referees) | `/revision` | `referee-sim` | Medium |
 | 8 | [Write a full paper from scratch](#8-write-a-full-paper-from-scratch) | `/full-paper` | All | Advanced |
+| 9 | [Resume a project across sessions](#9-resume-a-project-across-sessions) | `CLAUDE.md` + `MEMORY_LOCAL.md` | — | Easy |
 
 ---
 
@@ -393,20 +394,94 @@ Claude will:
 
 ---
 
+## 9. Resume a Project Across Sessions
+
+**When**: You worked on a paper days ago, now want to continue (e.g., after confirming target journal with advisor).
+
+**Tools**: `CLAUDE.md` + `MEMORY_LOCAL.md` (project-level memory files)
+
+### How It Works
+
+When you start Claude Code in a project directory that contains `CLAUDE.md`, it automatically loads that file as project instructions. `CLAUDE.md` tells Claude to read `MEMORY_LOCAL.md`, which contains the full project state.
+
+**No need to re-explain the paper, model, or previous results.** Claude already knows.
+
+### Setup (Done Once Per Project)
+
+When a project reaches a natural pause point (e.g., verification done, waiting for advisor input), Claude creates:
+
+```
+your-project-dir/
+├── CLAUDE.md            ← Claude auto-loads this (project instructions)
+├── MEMORY_LOCAL.md      ← Full project memory (model, results, next steps)
+├── Manuscript.md
+├── derivations/
+│   └── ...
+└── ...
+```
+
+### Dialogue Examples
+
+**Example A: Resume after confirming target journal**
+
+```
+You: 我们要投 Journal of Industrial Economics，帮我按格式修改论文
+
+Claude will:
+  → Read CLAUDE.md → MEMORY_LOCAL.md (already knows the paper)
+  → Already knows: 27 equations verified, Table 1 corrected, Eq 25 needs conditions
+  → Adjust formatting for JIE style
+  → Continue from where you left off
+```
+
+**Example B: Resume after a long break**
+
+```
+You: 这篇网络外部性的论文，我们继续
+
+Claude will:
+  → Load project memory automatically
+  → Summarize current status: "验算完成，修正版在 Manuscript_corrected.md"
+  → Ask what to do next
+```
+
+**Example C: Create project memory for a new paper**
+
+```
+You: 这篇论文验算完了，我过几天再来修改，帮我保存项目状态
+
+Claude will:
+  → Create CLAUDE.md + MEMORY_LOCAL.md
+  → Record: paper info, model summary, verification results, file map, next steps
+  → These files only affect this project, not other projects
+```
+
+### Key Points
+- `CLAUDE.md` and `MEMORY_LOCAL.md` are **project-local** — they don't affect other projects
+- Global `MEMORY.md` stores **cross-project lessons** (e.g., Wolfram tips), not project-specific details
+- Claude automatically creates these files when a project reaches a pause point
+
+---
+
 ## Choosing Your Path: Decision Tree
 
 ```
-Do you have a finished paper?
-├── YES → "Verify math?" → /derive + /verify
-│         "Export to Word?" → /export-word
-│         "Submit?" → /check-refs + /check-facts + full review
-│         "Respond to referees?" → /revision
+Resuming previous work?
+├── YES → Project has CLAUDE.md? → Just start Claude in that directory
+│         No CLAUDE.md? → Ask Claude to create project memory first
 │
-├── PARTIALLY → "Need to write sections?" → /write + /compile
-│               "Need figures?" → /plot
-│               "Need to verify what you have?" → /verify
-│
-└── NO → "Have a research idea?" → /full-paper
-         "Want to explore literature?" → /study + /lit-review
-         "Want to brainstorm?" → /idea
+└── NO (new task) →
+    Do you have a finished paper?
+    ├── YES → "Verify math?" → /derive + /verify
+    │         "Export to Word?" → /export-word
+    │         "Submit?" → /check-refs + /check-facts + full review
+    │         "Respond to referees?" → /revision
+    │
+    ├── PARTIALLY → "Need to write sections?" → /write + /compile
+    │               "Need figures?" → /plot
+    │               "Need to verify what you have?" → /verify
+    │
+    └── NO → "Have a research idea?" → /full-paper
+             "Want to explore literature?" → /study + /lit-review
+             "Want to brainstorm?" → /idea
 ```
