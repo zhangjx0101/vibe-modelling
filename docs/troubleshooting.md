@@ -292,3 +292,93 @@ Key information is persisted to:
 - `MEMORY_LOCAL.md` — project-specific learnings
 - `.mx` files — Wolfram state snapshots
 - `derivation_log.txt` — complete derivation records
+
+### Nested git repos break rules inheritance
+
+**Symptom**: After creating a separate git repo inside `project/` (e.g., for a private GitHub repo), Claude Code no longer loads `.claude/rules/*.md` from the parent vibe-modelling repo.
+
+**Cause**: Claude Code searches for configuration files by walking **up** from the current directory to the nearest `.git/` boundary. If you run `git init` inside a subdirectory, it creates a new boundary (an "inner wall") that blocks the upward search.
+
+```
+# BEFORE: one .git boundary — rules are reachable
+
+🧱 vibe-modelling/          ← .git/ (only boundary)
+├── .claude/rules/*.md      ✅ reachable
+└── project/author-name/
+    └── my-project/
+        └── CLAUDE.md        ✅ reachable
+
+# AFTER: nested .git — rules are blocked
+
+🧱 vibe-modelling/          ← outer .git/
+├── .claude/rules/*.md      ❌ outside inner wall, unreachable!
+└── project/author-name/    ← 🧱 inner .git/ (new boundary)
+    └── my-project/
+        └── CLAUDE.md        ✅ inside inner wall, reachable
+```
+
+**Solution**: Copy `.claude/rules/` into the inner git repo so the rules are inside the new boundary:
+
+```bash
+mkdir -p project/author-name/.claude/rules
+cp .claude/rules/*.md project/author-name/.claude/rules/
+```
+
+After this, the inner repo has its own copy of the rules, and everything loads correctly.
+
+### Understanding Claude Code's configuration loading
+
+Claude Code loads three types of configuration, each with a different mechanism:
+
+| Type | Location | Loading mechanism | Affected by git boundary? |
+|:---|:---|:---|:---:|
+| **Rules** (`.claude/rules/*.md`) | Inside git repo | Walk up to nearest `.git/` | **Yes** |
+| **CLAUDE.md** | Inside git repo | Walk up to nearest `.git/` | **Yes** |
+| **MEMORY.md** | `~/.claude/projects/.../memory/` | Fixed path in user home | **No** |
+
+Think of it this way:
+- **Rules & CLAUDE.md** = documents stored in an office — if you move to a different office (different git boundary), you can't see the old office's documents
+- **MEMORY.md** = a notebook in your pocket — you carry it everywhere, regardless of which office you're in
+
+**Practical implications**:
+
+1. `CLAUDE.md` in a project subdirectory only affects that directory and its children — sibling projects are not affected
+2. If you have nested git repos, each repo needs its own `.claude/rules/` copy
+3. `MEMORY.md` is always loaded regardless of git structure, making it ideal for cross-project learnings
+
+### Public repo + private project files
+
+**Scenario**: You want the workflow tools (skills, rules, docs) to be public, but research content to be private.
+
+**Recommended setup**: Two separate repos.
+
+| Repo | Visibility | Content |
+|:---|:---|:---|
+| `vibe-modelling` | Public | Skills, rules, docs, templates |
+| `your-research` | **Private** | Project manuscripts, derivations, reports |
+
+**Setup steps**:
+
+```bash
+# 1. Create private repo on GitHub
+gh repo create your-research --private
+
+# 2. Initialize git in the project directory
+cd project/author-name
+git init
+git remote add origin https://github.com/you/your-research.git
+
+# 3. Copy rules so they work inside the new git boundary
+mkdir -p .claude/rules
+cp ../../.claude/rules/*.md .claude/rules/
+
+# 4. Add project-specific CLAUDE.md for each sub-project
+# (stores paper context, status, next steps)
+
+# 5. Commit and push
+git add .
+git commit -m "init: add research projects"
+git push -u origin master
+```
+
+**Why not a single repo?** If `project/` is whitelisted in the public repo's `.gitignore`, the files are tracked by git — and an accidental `git push` would expose your research to everyone. Two repos eliminate this risk entirely.
