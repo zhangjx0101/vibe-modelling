@@ -160,6 +160,109 @@ Table[{cv, gv, pv, N[formula /. {c->cv, gamma->gv, phi->pv}]},
   {cv, caseValues}, {gv, gammaValues}, {pv, phiValues}]
 ```
 
+### Table column appears "constant" but shouldn't be
+
+**Symptom**: A paper's numerical table shows the same value (e.g., `t* = -6.48`) in every row, but your formula clearly depends on the row variable.
+
+**Example**: In the Network Externalities paper, the formula
+$$t^* = -\frac{(a-c(1+\xi))(2-n-(1-n)\gamma^2)}{(2-n)(1+\gamma)}$$
+depends on $n$, yet the paper's Table 1 shows `t* = -6.48` for all $n \in \{0, 0.1, \ldots, 0.8\}$.
+
+**Root cause**: The author likely computed `t*` at one parameter value (e.g., $n=0$) and copied it to all rows, not realizing the formula depends on that parameter.
+
+**Solution**: Always independently recompute every cell, even if it "looks constant":
+```mathematica
+Do[
+  tStar = tStarFormula /. {n -> nVal, (* other params *)};
+  Print["n=", nVal, "  t*=", N[tStar]];
+  , {nVal, 0, 0.8, 0.1}]
+```
+
+**Detection**: If a table column is constant, verify by checking: does the analytical formula contain that row variable? If yes, the "constant" is likely a copy-paste error.
+
+### Sign claim fails at boundary parameters
+
+**Symptom**: Paper claims `expr > 0`, and it checks out at the baseline parameters. But Wolfram gives a negative value at different parameter values.
+
+**Example**: The expression $1 - \beta(1 + \ln\frac{c+ps}{\beta})$ is claimed positive, and indeed positive at $\beta=0.5$. But at $\beta=0.7$ it becomes negative.
+
+**Root cause**: The sign depends on parameter conditions that the paper doesn't state. Authors often verify only at their baseline parameters.
+
+**Solution**: Always test with 3+ parameter sets including **boundary cases**:
+```mathematica
+(* Baseline *)
+expr /. {beta -> 0.5, c -> 1, p -> 0.2, s -> 1}  (* 0.062 > 0 *)
+(* Boundary *)
+expr /. {beta -> 0.7, c -> 1, p -> 0.2, s -> 1}  (* -0.077 < 0 !! *)
+(* Extreme *)
+expr /. {beta -> 0.9, c -> 2, p -> 0.5, s -> 2}  (* check *)
+```
+
+When a sign claim fails at boundary parameters, determine the exact condition:
+```mathematica
+Reduce[expr > 0, beta]  (* e.g., beta < 0.57 *)
+```
+
+### "Effective marginal cost" term written as product instead of subtraction
+
+**Symptom**: One SPNE formula (e.g., $\pi^*$) uses `c(1+ξ)(a-1) - t` while all other formulas ($q^*$, $CS^*$, $e^*$) consistently use `a - c(1+ξ) - t`.
+
+**Example**: In the Consumer Morality Preferences paper, Eq 15 writes:
+$$\pi^* \propto \left(c(1+\xi)(a-1) - t\right)^2$$
+but the correct expression (confirmed by Wolfram) is:
+$$\pi^* \propto \left(a - c(1+\xi) - t\right)^2$$
+
+**Root cause**: When hand-copying long formulas, `a - c(1+ξ)` can be misread or rearranged as `c(1+ξ)(a-1)`. These are completely different expressions — e.g., at $a=10, c=1, \xi=0.5, t=2$: the correct value is $6.5$, the wrong value is $11.5$.
+
+**Detection**: Check structural consistency. In a symmetric Cournot SPNE, the term $(a - c(1+\xi) - t)$ (or equivalently $A - c\xi - t$ where $A = a-c$) should appear uniformly across $q^*$, $\pi^*$, $CS^*$, and $SW^*$. If one formula suddenly uses a **multiplicative** form instead of a **subtractive** form, it is almost certainly a typo.
+
+**Projects affected**: Consumer Morality Preferences paper Eq 15.
+
+### SW* (social welfare closed form) is the highest-risk formula
+
+**Symptom**: The paper's displayed $SW^*$ formula has wrong denominator and/or numerator, but the optimal tax $t^*$ and comparative statics derived from $SW$ are correct.
+
+**Example**: In the Consumer Morality Preferences paper, Eq 17 writes:
+$$SW^* = \frac{4(A - c\xi - t)[\ldots]}{(4+(2-\gamma)\gamma)^2}$$
+with denominator $(4+(2-\gamma)\gamma)^2$, but the correct denominator is $D^2 = [(4+(2-\gamma)\gamma)^2 A_1 - 4A_4\varphi]^2$ (matching $\pi^*$ and $CS^*$).
+
+**Root cause**: $SW = 2\pi + CS + TR$ involves merging three components over a common denominator. The merged numerator is extremely long, making transcription errors likely. Authors often derive $t^*$ correctly from the uncombined form $dSW/dt = 0$ and only make errors when writing the combined closed-form.
+
+**Detection**:
+1. **Denominator check**: $SW^*$'s denominator should be structurally consistent with $\pi^*$ and $CS^*$ (typically $D^2$ where $D$ is the common denominator from the output equation).
+2. **Cross-verify**: If $t^*$ (derived from $dSW/dt=0$) is correct but $SW^*$ doesn't match Wolfram, the error is in the transcription of $SW^*$, not in the derivation.
+
+**Preferred representation**: For papers with complex welfare expressions, write $SW^*$ as:
+$$SW^* = 2\pi^* + CS^* + TR^*$$
+with each component displayed separately (all independently verified), rather than combining into one fraction.
+
+**Projects affected**: Consumer Morality Preferences paper Eq 17; Network Externalities paper Eq 17 (SW* denominator).
+
+### Rational expectations: FOC ordering matters
+
+**Symptom**: Your Wolfram `Solve` result for output $q_i$ doesn't match the paper's formula. The denominators have different structures (e.g., $(1-n)^2(4-\gamma^2)$ vs $(2-n)^2 - (1-n)^2\gamma^2$).
+
+**Root cause**: In network externalities models, $y_i$ is the consumer's expectation of network size. There are two approaches:
+
+| Approach | Steps | Result |
+|----------|-------|--------|
+| **Correct** (fixed expectations) | FOC w.r.t. $q_i$ with $y_i$ fixed → substitute $y_i = q_i$ | Coefficient on $q_i$: $(2-n)$ |
+| **Wrong** (pre-substituted) | Substitute $y_i = q_i$ first → FOC w.r.t. $q_i$ | Coefficient on $q_i$: $2(1-n)$ |
+
+**Solution**: Keep expectations as separate variables during optimization:
+```mathematica
+(* CORRECT: y1, y2 are separate expectation variables *)
+EU = (a - q1 - gamma*q2 + n*(y1 + gamma*y2) - t - c*(1+xi)) * q1 + lambda*q1;
+FOC = D[EU, q1];              (* y1 does NOT change with q1 *)
+FOC = FOC /. {y1 -> q1, y2 -> q2};  (* impose RE AFTER differentiation *)
+
+(* WRONG: substituting y=q before FOC *)
+EU = (a - (1-n)*q1 - (1-n)*gamma*q2 - t - c*(1+xi)) * q1 + lambda*q1;
+FOC = D[EU, q1];              (* n affects the q1 coefficient *)
+```
+
+This is a general principle: **substitutions that create dependencies between the choice variable and other terms must be imposed after optimization, not before.**
+
 ---
 
 ## Git / Workflow Issues
