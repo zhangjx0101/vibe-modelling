@@ -54,6 +54,42 @@ Export["figures/Figure1.png", fig, ImageResolution -> 300];
 
 Then reference the PNG version in your Markdown/LaTeX.
 
+### Word two-column equation tables produce messy Markdown
+
+**Symptom**: After `pandoc input.docx -o output.md`, equations appear wrapped in table markup like:
+
+```markdown
++-----------------------------------+-------+
+| $$p_{i} = (a + \varphi e_{i})...$$| \(2\) |
++===================================+=======+
+```
+
+instead of clean inline math.
+
+**Cause**: Many economics papers use a two-column, one-row Word table to align equations (left column) with equation numbers (right column). Pandoc faithfully converts these tables, producing `+---+`, `===`, and pipe-delimited rows around every equation.
+
+**Additional issues**:
+- Equation numbers often get lost or rendered as empty `()`
+- Section numbering may be incorrect (Pandoc auto-numbers from scratch)
+- LaTeX artifacts like `\left\lbrack`, `{2e}_{2}`, `{-\gamma}^2` appear
+
+**Solution**: A two-pass cleanup workflow:
+
+1. **Convert with Pandoc** (preserve raw content):
+   ```bash
+   pandoc input.docx -o Manuscript_raw.md --wrap=none --extract-media=media \
+     --from docx --to markdown+tex_math_dollars
+   ```
+
+2. **Manual cleanup** (or scripted):
+   - Remove all table markup (`+---+`, `|`, `===`)
+   - Restore equation numbers as `\tag{N}` from the original Word file
+   - Fix section numbering to match the paper's structure
+   - Clean LaTeX artifacts: `\left\lbrack` → `\left[`, `{-\gamma}^2` → `-\gamma^2`
+   - Save as `Manuscript.md` (keep `Manuscript_raw.md` as reference)
+
+**Tip**: Always keep the raw Pandoc output (`Manuscript_raw.md`) so you can cross-reference if cleanup introduces errors.
+
 ---
 
 ## Wolfram Issues
