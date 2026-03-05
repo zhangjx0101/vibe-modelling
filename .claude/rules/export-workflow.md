@@ -15,10 +15,22 @@ Manuscript.md → [Wolfram 预处理] → temp.md → [Pandoc] → .docx
 ```
 
 1. 运行 `preprocess_md.wl` 替换不兼容 LaTeX 命令（`\tag{}` → `\qquad\text{()}`）
-2. 运行 pandoc：`--from markdown+footnotes+pipe_tables+tex_math_dollars --standalone`
+2. 运行 pandoc（含模板和标题层级参数）：
+   ```bash
+   pandoc temp.md -o output.docx \
+     --reference-doc=assets/academic-template.docx \
+     --shift-heading-level-by=-1 \
+     --from markdown+footnotes+pipe_tables+tex_math_dollars \
+     --resource-path=. --standalone
+   ```
 3. 清理临时文件
 
+### 标题层级约定
+用户写法：`#` = 论文标题，`##` = 章节，`###` = 子章节。
+`--shift-heading-level-by=-1` 让 `#` → Title 样式，`##` → Heading 1。
+
 ### 注意事项
+- `--reference-doc=assets/academic-template.docx` 引用自定义 Word 模板
 - 图片必须是 PNG/JPG（pandoc 不支持 PDF 嵌入 Word）
 - `\tag{}` 等 amsmath 专属命令需预处理
 - 用 Wolfram `StringReplace` 处理 LaTeX 文本，不用 sed/perl

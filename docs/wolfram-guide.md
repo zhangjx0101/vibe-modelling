@@ -193,6 +193,57 @@ c = 3/10;  (* NOT 0.3 *)
 N[result, 10]  (* 10 significant digits *)
 ```
 
+### 6. Rational expectations: substitution order
+
+In network externalities models, expectations $y_i$ must be kept as separate variables during FOC computation. Substituting $y_i = q_i$ **before** the FOC changes the derivative and gives wrong results.
+
+```mathematica
+(* CORRECT: keep y1, y2 separate, impose RE after FOC *)
+EU = (aa - q1 - ga*q2 + nn*(y1 + ga*y2) - tt - cc*(1+xi))*q1 + lam*q1;
+FOCq1 = D[EU, q1];                       (* d/dq1 with y1 fixed *)
+FOCq1 = FOCq1 /. {y1 -> q1, y2 -> q2};  (* THEN impose y=q *)
+
+(* WRONG: pre-substituting y=q makes n affect the q1 coefficient *)
+EU = (aa - (1-nn)*q1 - (1-nn)*ga*q2 - tt - cc*(1+xi))*q1 + lam*q1;
+FOCq1 = D[EU, q1];  (* gives 2(1-n) instead of (2-n) *)
+```
+
+**Symptom**: Wolfram gives denominator $(1-n)^2(4-\gamma^2)$ instead of $(2-n)^2-(1-n)^2\gamma^2$.
+
+**Rule**: Any identity that links the choice variable to another variable (like rational expectations $y_i = q_i$) must be imposed **after** computing FOCs.
+
+### 7. Fractional powers and `FullSimplify`
+
+When verifying expressions involving $\xi = ((c+ps)/\beta)^{1/(\beta-1)}$, `FullSimplify` often cannot simplify $\xi^{\beta-1}$ back to $(c+ps)/\beta$ without assumptions.
+
+```mathematica
+(* BAD: FullSimplify may not simplify this *)
+FullSimplify[beta * xiDef^(beta-1) - (cc + pp*ss)]
+
+(* GOOD: use PowerExpand for fractional power identities *)
+PowerExpand[xiDef^(beta-1)]  (* returns (cc+pp*ss)/bb *)
+
+(* ALSO GOOD: verify numerically when symbolic fails *)
+testParams = {cc -> 1, pp -> 0.2, ss -> 1, bb -> 0.5};
+N[beta * xiDef^(beta-1) - (cc + pp*ss) /. testParams]  (* → 0 *)
+```
+
+### 8. FOC simplification with equilibrium identities
+
+When the FOC relation $\beta\xi^{\beta-1} = c + ps$ holds, it implies:
+$$\xi^\beta - ps\cdot\xi = (1-\beta)\xi^\beta + c\cdot\xi$$
+
+Papers often use this to simplify the effective intercept:
+$$a - c(1+\xi) + \xi^\beta - ps\cdot\xi = a - c + (1-\beta)\xi^\beta$$
+
+Wolfram will NOT apply this automatically. You can:
+1. Verify numerically (recommended)
+2. Manually substitute using replacement rules:
+```mathematica
+(* Replace pp*ss with beta*xi^(beta-1) - cc *)
+simplified = expr /. pp*ss -> bb*PowerExpand[xiDef^(bb-1)] - cc;
+```
+
 ## 7-Phase Script Structure
 
 For comprehensive derivation scripts, follow this structure:
